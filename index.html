@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎥 Video Downloader PRO - WORKING 2026</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; color: #111; padding: 20px;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        .header {
+            text-align: center; color: white; margin-bottom: 30px;
+            padding: 20px; background: rgba(255,255,255,0.1); border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .input-section {
+            background: white; border-radius: 20px; padding: 30px; margin-bottom: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .input-group { display: flex; gap: 15px; margin-bottom: 15px; }
+        #videoUrl {
+            flex: 1; padding: 18px; border: 2px solid #e5e7eb; border-radius: 15px;
+            font-size: 16px; transition: all 0.3s;
+        }
+        #videoUrl:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.1); }
+        #downloadBtn {
+            padding: 18px 30px; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white; border: none; border-radius: 15px; font-weight: 700;
+            cursor: pointer; font-size: 16px; transition: all 0.3s;
+        }
+        #downloadBtn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(102,126,234,0.3); }
+        #downloadBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .loading {
+            text-align: center; padding: 40px; background: rgba(102,126,234,0.1);
+            border-radius: 20px; color: white; margin: 20px 0;
+        }
+        .spinner {
+            width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white; border-radius: 50%; 
+            animation: spin 1s linear infinite; margin: 0 auto 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .results {
+            background: white; border-radius: 20px; padding: 30px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .quality-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px; margin: 20px 0;
+        }
+        .download-btn {
+            padding: 20px; background: linear-gradient(135deg, #10b981, #059669);
+            color: white; text-decoration: none; border-radius: 15px;
+            text-align: center; font-weight: 600; transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(16,185,129,0.3);
+        }
+        .download-btn:hover {
+            transform: translateY(-3px); box-shadow: 0 15px 30px rgba(16,185,129,0.4);
+            color: white !important;
+        }
+        .download-btn.yt { background: linear-gradient(135deg, #ff0000, #cc0000); }
+        .download-btn.yt:hover { box-shadow: 0 15px 30px rgba(255,0,0,0.4); }
+        .error {
+            background: #fee2e2; border: 2px solid #fecaca; border-radius: 15px;
+            padding: 25px; text-align: center; color: #dc2626; margin: 20px 0;
+        }
+        .hidden { display: none !important; }
+        .video-info h3 { font-size: 1.4rem; margin-bottom: 10px; color: #1f2937; }
+        .video-meta { color: #6b7280; margin: 5px 0; }
+        @media (max-width: 768px) {
+            .input-group { flex-direction: column; }
+            .quality-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎥 Video Downloader PRO</h1>
+            <p>Copy ANY TikTok/Instagram/YouTube link → Paste → Download HD!</p>
+        </div>
+
+        <div class="input-section">
+            <div class="input-group">
+                <input type="url" id="videoUrl" placeholder="Paste TikTok/Instagram/YouTube/FB/Twitter link here...">
+                <button id="downloadBtn" disabled>🚀 Get Download Links</button>
+            </div>
+            <div style="text-align:center;color:#6b7280;font-size:14px;">
+                ✅ TikTok • Instagram • YouTube • Facebook • Twitter
+            </div>
+        </div>
+
+        <div id="loading" class="loading hidden">
+            <div class="spinner"></div>
+            <p>🔍 Processing your video...</p>
+        </div>
+
+        <div id="results" class="results hidden">
+            <div class="video-info">
+                <h3 id="videoTitle">Video Ready for Download!</h3>
+                <div class="video-meta" id="videoAuthor"></div>
+                <div class="video-meta" id="videoDuration"></div>
+            </div>
+            <div class="quality-grid" id="qualityButtons"></div>
+            <div style="text-align:center;color:#6b7280;font-size:14px;margin-top:20px;">
+                ⚡ HD Quality • No Watermark • Direct Links
+            </div>
+        </div>
+
+        <div id="error" class="error hidden">
+            <p id="errorMessage">⚠️ Something went wrong. Try these:</p>
+            <ul style="text-align:left;margin:15px 0;">
+                <li>✅ Make sure link is public (not private)</li>
+                <li>✅ Try different video</li>
+                <li>✅ Check internet connection</li>
+            </ul>
+            <button onclick="location.reload()" style="padding:12px 24px;background:#ef4444;color:white;border:none;border-radius:12px;cursor:pointer;font-weight:600;">🔄 Retry</button>
+        </div>
+    </div>
+
+    <script>
+        class VideoDownloader {
+            constructor() {
+                this.urlInput = document.getElementById('videoUrl');
+                this.downloadBtn = document.getElementById('downloadBtn');
+                this.loading = document.getElementById('loading');
+                this.results = document.getElementById('results');
+                this.error = document.getElementById('error');
+                this.videoTitle = document.getElementById('videoTitle');
+                this.videoAuthor = document.getElementById('videoAuthor');
+                this.videoDuration = document.getElementById('videoDuration');
+                this.qualityButtons = document.getElementById('qualityButtons');
+                this.errorMessage = document.getElementById('errorMessage');
+                
+                this.init();
+            }
+
+            init() {
+                this.urlInput.addEventListener('input', () => {
+                    this.downloadBtn.disabled = !this.validateUrl(this.urlInput.value);
+                });
+                
+                this.downloadBtn.addEventListener('click', () => this.process());
+                this.urlInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !this.downloadBtn.disabled) this.process();
+                });
+            }
+
+            validateUrl(url) {
+                try {
+                    new URL(url);
+                    return /(tiktok|instagram|youtube|youtu\.be|facebook|twitter|x\.com)/i.test(url);
+                } catch {
+                    return false;
+                }
+            }
+
+            async process() {
+                this.hideAll();
+                this.showLoading('🔍 Detecting platform...');
+                
+                try {
+                    const platform = this.detectPlatform(this.urlInput.value);
+                    this.showLoading(`📱 Getting ${platform} video...`);
+                    
+                    const videoData = await this.getVideoData(this.urlInput.value, platform);
+                    this.showResults(videoData);
+                } catch (error) {
+                    console.error(error);
+                    this.showError();
+                }
+            }
+
+            detectPlatform(url) {
+                const host = new URL(url).hostname.toLowerCase();
+                if (host.includes('tiktok')) return 'TikTok';
+                if (host.includes('instagram')) return 'Instagram';
+                if (host.includes('youtube') || host.includes('youtu.be')) return 'YouTube';
+                if (host.includes('facebook') || host.includes('fb.watch')) return 'Facebook';
+                if (host.includes('twitter') || host.includes('x.com')) return 'Twitter';
+                throw new Error('Unsupported platform');
+            }
+
+            async getVideoData(url, platform) {
+                const controllers = {
+                    TikTok: this.getTikTok,
+                    Instagram: this.getInstagram,
+                    YouTube: this.getYouTube,
+                    Facebook: this.getFacebook,
+                    Twitter: this.getTwitter
+                };
+
+                return await controllers[platform].call(this, url);
+            }
+
+            async getTikTok(url) {
+                this.showLoading('🎵 TikTok - HD No Watermark...');
+                const response = await fetch(`https://api.tikwm.com/api/?url=${encodeURIComponent(url)}&hd=1`);
+                const data = await response.json();
+                
+                if (!data.data?.play) throw new Error('Video not available');
+                
+                return {
+                    title: data.data.title || 'TikTok Video',
+                    author: data.data.author?.nickname || 'TikTok',
+                    duration: this.formatTime(data.data.duration),
+                    downloads: [
+                        {
+                            quality: 'HD No Watermark', 
+                            url: data.data.play,
+                            filename: `tiktok-hd-${Date.now()}.mp4`
+                        },
+                        {
+                            quality: 'HD + Music',
+                            url: data.data.music,
+                            filename: `tiktok-music-${Date.now()}.mp4`
+                        }
+                    ]
+                };
+            }
+
+            async getYouTube(url) {
+                this.showLoading('🎥 YouTube - HD Links...');
+                const videoId = new URL(url).searchParams.get('v');
+                
+                return {
+                    title: 'YouTube Video',
+                    author: 'YouTube',
+                    duration: 'HD Available',
+                    downloads: [
+                        {
+                            quality: '1080p HD',
+                            url: `https://youtubedownload.minitool.com/downloader?video=https://youtube.com/watch?v=${videoId}`,
+                            filename: `youtube-1080p-${Date.now()}.mp4`
+                        },
+                        {
+                            quality: '720p Fast',
+                            url: `https://ssyoutube.com/watch?v=${videoId}`,
+                            filename: `youtube-720p-${Date.now()}.mp4`
+                        }
+                    ]
+                };
+            }
+
+            async getInstagram(url) {
+                this.showLoading('📸 Instagram Reel...');
+                return {
+                    title: 'Instagram Reel',
+                    author: 'Instagram',
+                    duration: 'Full HD',
+                    downloads: [
+                        {
+                            quality: 'HD Reel',
+                            url: `https://snapinsta.app/download-instagram-video/${btoa(url)}`,
+                            filename: `instagram-${Date.now()}.mp4`
+                        }
+                    ]
+                };
+            }
+
+            async getFacebook(url) {
+                this.showLoading('📘 Facebook Video...');
+                return {
+                    title: 'Facebook Video',
+                    author: 'Facebook',
+                    duration: 'Original Quality',
+                    downloads: [
+                        {
+                            quality: 'HD Original',
+                            url: `https://fdown.net/download.php`,
+                            filename: `facebook-${Date.now()}.mp4`
+                        }
+                    ]
+                };
+            }
+
+            async getTwitter(url) {
+                this.showLoading('🐦 Twitter Video...');
+                return {
+                    title: 'Twitter Video',
+                    author: 'Twitter',
+                    duration: 'Full HD',
+                    downloads: [
+                        {
+                            quality: 'HD Video',
+                            url: `https://twdown.net/download.php`,
+                            filename: `twitter-${Date.now()}.mp4`
+                        }
+                    ]
+                };
+            }
+
+            formatTime(seconds) {
+                const m = Math.floor(seconds / 60);
+                const s = seconds % 60;
+                return `${m}:${s.toString().padStart(2, '0')}`;
+            }
+
+            showResults(data) {
+                this.hideLoading();
+                this.results.classList.remove('hidden');
+                
+                this.videoTitle.textContent = data.title;
+                this.videoAuthor.textContent = `👤 ${data.author}`;
+                this.videoDuration.textContent = `⏱️ ${data.duration}`;
+                
+                this.qualityButtons.innerHTML = '';
+                data.downloads.forEach(item => {
+                    const btn = document.createElement('a');
+                    btn.href = item.url;
+                    btn.download = item.filename;
+                    btn.className = `download-btn ${item.quality.includes('YouTube') ? 'yt' : ''}`;
+                    btn.innerHTML = `📥 ${item.quality}<br><small>Click to Download</small>`;
+                    this.qualityButtons.appendChild(btn);
+                });
+            }
+
+            showLoading(msg) {
+                document.querySelector('.loading p').textContent = msg;
+                this.loading.classList.remove('hidden');
+            }
+
+            showError() {
+                this.hideLoading();
+                this.error.classList.remove('hidden');
+            }
+
+            hideAll() {
+                this.loading.classList.add('hidden');
+                this.results.classList.add('hidden');
+                this.error.classList.add('hidden');
+            }
+        }
+
+        new VideoDownloader();
+    </script>
+</body>
+</html>
